@@ -1,89 +1,98 @@
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
 
-def generate_demo_candles(n=80, seed=None):
+
+def generate_demo_candles(timeframe="M5", periods=80, seed=None):
+    """Gera candles sintéticos para testar a estratégia; não usa preços reais."""
     rng = np.random.default_rng(seed)
-    changes = rng.normal(0.02, 0.45, n)
-    close = 100 + np.cumsum(changes)
-    open_ = np.r_[close[0], close[:-1] + rng.normal(0, 0.12, n-1)]
-    high = np.maximum(open_, close) + rng.uniform(0.05, 0.4, n)
-    low = np.minimum(open_, close) - rng.uniform(0.05, 0.4, n)
-    times = [(datetime.now() - timedelta(minutes=5*(n-i))).strftime("%H:%M") for i in range(n)]
-    return pd.DataFrame({"Hora": times, "Abertura": open_, "Máxima": high, "Mínima": low, "Fechamento": close})
+    drift = rng.choice([-0.00025, 0.00025])
+    returns = rng.normal(loc=drift, scale=0.0012, size=periods)
+    close = 1.1000 * np.exp(np.cumsum(returns))
+    open_ = np.concatenate(([close[0] * (1 - returns[0]), close[:-1]]))
+    wick_up = rng.uniform(0.0001, 0.0010, size=periods)
+    wick_down = rng.uniform(0.0001, 0.0010, size=periods)
+    high = np.maximum(open_, close) + wick_up
+    low = np.minimum(open_, close) - wick_down
+    if timeframe == "M1":
+        freq = "min"
+    elif timeframe == "M15":
+        freq = "15min"
+    else:
+        freq = "5min"
+    times = pd.date_range(end=pd.Timestamp.now(), periods=periods, freq=freq)
+    return pd.DataFrame({"time": times, "open": open_, "high": high, "low": low, "close": close})
 
-def analyze_market(df):
-    if len(df) < 20:
+
+def analyze_market(candles):
+    """Análise educativa simples: tendência, candle e proximidade de Fibonacci."""
+    if candles is None or len(candles) < 25:
         return {
-            "direcao": "Indefinida", "estrutura": "Dados insuficientes",
-            "padrao": "Nenhum", "fib_regiao": "Indisponível",
-            "sinal": "AGUARDAR", "motivo": "Aguardando mais candles"
+            "signal": "AGUARDAR", "trend": "Indefinida", "last_price": 0.0,
+            "confidence": "Baixa", "reason": "Dados insuficientes para analisar.",
+            "fibonacci": {"38.2%": 0.0, "50.0%": 0.0, "61.8%": 0.0}
         }
 
-    close = df["Fechamento"]
-    high = df["Máxima"]
-    low = df["Mínima"]
-    recent = close.iloc[-10:]
-    slope = recent.iloc[-1] - recent.iloc[0]
+    df = candles.copy().reset_index(drop=True)
+    closes = df["close"]
+    last = df.iloc[-1]
+    prev = df.iloc[-2]
+    sma_fast = closes.rolling(8).mean().iloc[-1]
+    sma_slow = closes.rolling(21).mean().iloc[-1]
+    trend = "Alta" if sma_fast > sma_slow else "Baixa" if sma_fast < sma_slow else "Lateral"
 
-    if slope > 0.35:
-        direction = "Altista"
-        structure = "Possível sequência de fundos/topos ascendentes"
-    elif slope < -0.35:
-        direction = "Baixista"
-        structure = "Possível sequência de topos/fundos descendentes"
-    else:
-        direction = "Lateral / indefinida"
-        structure = "Sem direção clara"
+    body = abs(last["close"] - last["open"])
+    candle_range = max(last["high"] - last["low"], 1e-9)
+    lower_wick = min(last["open"], last["close"]) - last["low"]
+    upper_wick = last["high"] - max(last["open"], last["close"])
+    bullish_engulf = (
+        last["close"] > last["open"] and prev["close"] < prev["open"]
+        and last["close"] >= prev["open"] and last["open"] <= prev["close"]
+    )
+    bearish_engulf = (
+        last["close"] < last["open"] and prev["close"] > prev["open"]
+        and last["open"] >= prev["close"] and last["close"] <= prev["open"]
+    )
+    bullish_rejection = lower_wick / candle_range > 0.45 and last["close"] > last["open"]
+    bearish_rejection = upper_wick / candle_range > 0.45 and last["close"] < last["open"]
 
-    # Fibonacci on the recent swing range. Illustrative heuristic only.
-    swing_high = float(high.iloc[-20:].max())
-    swing_low = float(low.iloc[-20:].min())
+    swing_high = float(df["high"].tail(30).max())
+    swing_low = float(df["low"].tail(30).min())
     span = max(swing_high - swing_low, 1e-9)
-    current = float(close.iloc[-1])
-    if direction == "Altista":
-        fib_382 = swing_high - span * 0.382
-        fib_500 = swing_high - span * 0.500
-        fib_618 = swing_high - span * 0.618
-        distance = min(abs(current-fib_382), abs(current-fib_500), abs(current-fib_618))
-        region = "Próxima de 38,2%" if abs(current-fib_382) == distance else ("Próxima de 50%" if abs(current-fib_500) == distance else "Próxima de 61,8%")
-    else:
-        fib_382 = swing_low + span * 0.382
-        fib_500 = swing_low + span * 0.500
-        fib_618 = swing_low + span * 0.618
-        distance = min(abs(current-fib_382), abs(current-fib_500), abs(current-fib_618))
-        region = "Próxima de 38,2%" if abs(current-fib_382) == distance else ("Próxima de 50%" if abs(current-fib_500) == distance else "Próxima de 61,8%")
+    # Retracement levels measured downward from the recent high.
+    fibs = {
+        "38.2%": swing_high - span * 0.382,
+        "50.0%": swing_high - span * 0.500,
+        "61.8%": swing_high - span * 0.618,
+    }
+    price = float(last["close"])
+    near_fib = min(abs(price - level) / max(span, 1e-9) for level in fibs.values()) < 0.12
 
-    o = float(df["Abertura"].iloc[-1])
-    c = float(df["Fechamento"].iloc[-1])
-    h = float(df["Máxima"].iloc[-1])
-    l = float(df["Mínima"].iloc[-1])
-    body = abs(c-o)
-    upper_wick = h-max(o,c)
-    lower_wick = min(o,c)-l
-
-    if lower_wick > body*1.8 and c > o:
-        pattern = "Possível rejeição compradora"
-    elif upper_wick > body*1.8 and c < o:
-        pattern = "Possível rejeição vendedora"
-    else:
-        pattern = "Sem padrão de rejeição claro"
-
-    # Conservative educational signal: direction + candle rejection.
     signal = "AGUARDAR"
-    reason = "Não há confluência suficiente; aguardar."
-    if direction == "Altista" and "compradora" in pattern and ("50%" in region or "61,8%" in region):
-        signal = "COMPRA (DEMO)"
-        reason = "Tendência estimada altista + possível rejeição + região de retração."
-    elif direction == "Baixista" and "vendedora" in pattern and ("50%" in region or "61,8%" in region):
-        signal = "VENDA (DEMO)"
-        reason = "Tendência estimada baixista + possível rejeição + região de retração."
+    confidence = "Baixa"
+    reason = "Os critérios não coincidiram; aguardar é a decisão padrão."
+    bullish_pattern = bullish_engulf or bullish_rejection
+    bearish_pattern = bearish_engulf or bearish_rejection
+
+    if trend == "Alta" and bullish_pattern and near_fib:
+        signal, confidence = "COMPRA (simulada)", "Média"
+        pattern = "engolfo de alta" if bullish_engulf else "rejeição compradora"
+        reason = f"Tendência de alta, {pattern} e preço próximo de uma retração de Fibonacci. Sinal educativo, não validado."
+    elif trend == "Baixa" and bearish_pattern and near_fib:
+        signal, confidence = "VENDA (simulada)", "Média"
+        pattern = "engolfo de baixa" if bearish_engulf else "rejeição vendedora"
+        reason = f"Tendência de baixa, {pattern} e preço próximo de uma retração de Fibonacci. Sinal educativo, não validado."
+    else:
+        details = []
+        details.append(f"tendência: {trend.lower()}")
+        details.append("padrão de candle identificado" if (bullish_pattern or bearish_pattern) else "sem padrão claro")
+        details.append("próximo de Fibonacci" if near_fib else "longe das zonas de Fibonacci")
+        reason = "AGUARDAR: " + "; ".join(details) + "."
 
     return {
-        "direcao": direction,
-        "estrutura": structure,
-        "padrao": pattern,
-        "fib_regiao": region,
-        "sinal": signal,
-        "motivo": reason
+        "signal": signal,
+        "trend": trend,
+        "last_price": price,
+        "confidence": confidence,
+        "reason": reason,
+        "fibonacci": fibs,
     }
