@@ -203,6 +203,20 @@ with left:
         )
 
         st.session_state.last_analysis = result
+        if "COMPRA" in result["signal"]:
+    ordem_polarium = "BUY"
+elif "VENDA" in result["signal"]:
+    ordem_polarium = "SELL"
+else:
+    ordem_polarium = "AGUARDAR"
+
+st.session_state.ordem_polarium = {
+    "conta": modo_polarium,
+    "ativo": ativo_polarium,
+    "periodo": timeframe,
+    "valor": entry_amount,
+    "ordem": ordem_polarium
+}
 
 
         # -------------------------------------------------
