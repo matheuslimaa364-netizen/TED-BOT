@@ -67,26 +67,30 @@ def analyze_market(candles):
     price = float(last["close"])
     near_fib = min(abs(price - level) / max(span, 1e-9) for level in fibs.values()) < 0.12
 
-    signal = "AGUARDAR"
-    confidence = "Baixa"
-    reason = "Os critérios não coincidiram; aguardar é a decisão padrão."
-    bullish_pattern = bullish_engulf or bullish_rejection
-    bearish_pattern = bearish_engulf or bearish_rejection
+        sinal = "AGUARDAR"
+    confianca = "Baixa"
+    razao = "Os critérios ainda não coincidem."
+    padrao_alta = engolfo_de_alta or rejeicao_otimista
+    padrao_baixa = engolfo_de_baixa or rejeicao_baixista
 
-    if trend == "Alta" and bullish_pattern and near_fib:
-        signal, confidence = "COMPRA (simulada)", "Média"
-        pattern = "engolfo de alta" if bullish_engulf else "rejeição compradora"
-        reason = f"Tendência de alta, {pattern} e preço próximo de uma retração de Fibonacci. Sinal educativo, não validado."
-    elif trend == "Baixa" and bearish_pattern and near_fib:
-        signal, confidence = "VENDA (simulada)", "Média"
-        pattern = "engolfo de baixa" if bearish_engulf else "rejeição vendedora"
-        reason = f"Tendência de baixa, {pattern} e preço próximo de uma retração de Fibonacci. Sinal educativo, não validado."
+    if tendencia == "Alta" and padrao_alta and proximo_de_Fibonacci:
+        sinal = "COMPRA (simulada)"
+        confianca = "Alta"
+        padrao = "engolfo de alta" if engolfo_de_alta else "rejeição compradora"
+        razao = f"Tendência de alta + {padrao} + proximidade de Fibonacci."
+
+    elif tendencia == "Baixa" and padrao_baixa and proximo_de_Fibonacci:
+        sinal = "VENDA (simulada)"
+        confianca = "Alta"
+        padrao = "engolfo de baixa" if engolfo_de_baixa else "rejeição vendedora"
+        razao = f"Tendência de baixa + {padrao} + proximidade de Fibonacci."
+
     else:
-        details = []
-        details.append(f"tendência: {trend.lower()}")
-        details.append("padrão de candle identificado" if (bullish_pattern or bearish_pattern) else "sem padrão claro")
-        details.append("próximo de Fibonacci" if near_fib else "longe das zonas de Fibonacci")
-        reason = "AGUARDAR: " + "; ".join(details) + "."
+        detalhes = []
+        detalhes.append(f"tendência: {tendencia.lower()}")
+        detalhes.append("padrão de candle identificado" if (padrao_alta or padrao_baixa) else "sem padrão claro")
+        detalhes.append("próximo de Fibonacci" if proximo_de_Fibonacci else "longe das zonas de Fibonacci")
+        razao = "AGUARDAR: " + "; ".join(detalhes) + "."
 
     return {
         "signal": signal,
