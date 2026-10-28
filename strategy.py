@@ -97,6 +97,6 @@ def analyze_market(candles):
         "trend": trend,
         "last_price": price,
         "confidence": confianca,
-        "reason": reason,
+        "reason": razao,
         "fibonacci": fibs,
     }
