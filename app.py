@@ -56,6 +56,10 @@ with left:
                 st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) + (entry_amount * 0.85)
             else:
                 st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) - entry_amount
+            if st.session_state.lucro_sessao >= daily_target:
+                st.session_state.running = False
+            if st.session_state.lucro_sessao <= -daily_loss_limit:
+                st.session_state.running = False
 
                 st.session_state.history.insert(0, {
                 "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -73,11 +77,14 @@ with right:
         st.session_state.running = False
         st.rerun()
 
-if st.session_state.running:
+if st.session_state.lucro_sessao >= daily_target:
+    st.success("🎯 Meta diária atingida! Simulação pausada automaticamente.")
+elif st.session_state.lucro_sessao <= -daily_loss_limit:
+    st.error("🛑 Limite de perda atingido! Simulação pausada automaticamente.")
+elif st.session_state.running:
     st.success("Simulação ativa. Clique em “Iniciar simulação” novamente para gerar uma nova análise demonstrativa.")
 else:
     st.warning("Simulação pausada. Nenhuma operação real está sendo executada.")
-
 st.subheader("🔎 Última análise demonstrativa")
 if st.session_state.last_analysis is None:
     st.info("Clique em “Iniciar simulação” para gerar uma análise com candles fictícios.")
