@@ -80,7 +80,10 @@ timeframe = st.sidebar.selectbox(
     "Período gráfico",
     ["M1", "M5", "M15"]
 )
-
+modo_conta = st.sidebar.selectbox(
+    "Modo da conta",
+    ["🧪 DEMO", "💰 REAL"]
+)
 st.sidebar.checkbox(
     "Martingale (desativado por segurança)",
     value=False,
