@@ -44,11 +44,11 @@ def analyze_market(candles):
     candle_range = max(last["high"] - last["low"], 1e-9)
     lower_wick = min(last["open"], last["close"]) - last["low"]
     upper_wick = last["high"] - max(last["open"], last["close"])
-    bullish_engulf = (
+    engolfo_alta = (
         last["close"] > last["open"] and prev["close"] < prev["open"]
         and last["close"] >= prev["open"] and last["open"] <= prev["close"]
     )
-    bearish_engulf = (
+    engolfo_baixa = (
         last["close"] < last["open"] and prev["close"] > prev["open"]
         and last["open"] >= prev["close"] and last["close"] <= prev["open"]
     )
@@ -70,8 +70,8 @@ def analyze_market(candles):
     sinal = "AGUARDAR"
     confianca = "Baixa"
     razao = "Os critérios ainda não coincidem."
-    padrao_alta = engolfo_alta or rejeicao_otimista
-    padrao_baixa = engolfo_baixa or rejeicao_baixista
+    padrao_alta = engolfo_alta or bullish_rejection
+    padrao_baixa = engolfo_baixa or bearish_rejection
 
     if tendencia == "Alta" and padrao_alta and proximo_de_Fibonacci:
         sinal = "COMPRA (simulada)"
