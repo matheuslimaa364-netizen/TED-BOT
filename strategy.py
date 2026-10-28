@@ -8,7 +8,7 @@ def generate_demo_candles(timeframe="M5", periods=80, seed=None):
     drift = rng.choice([-0.00025, 0.00025])
     returns = rng.normal(loc=drift, scale=0.0012, size=periods)
     close = 1.1000 * np.exp(np.cumsum(returns))
-    open_ = np.concatenate(([close[0] * (1 - returns[0]), close[:-1]]))
+   open = np.concatenate([[close[0] * (1 - returns[0])], close[:-1]])
     wick_up = rng.uniform(0.0001, 0.0010, size=periods)
     wick_down = rng.uniform(0.0001, 0.0010, size=periods)
     high = np.maximum(open_, close) + wick_up
