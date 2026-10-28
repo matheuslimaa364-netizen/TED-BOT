@@ -40,7 +40,7 @@ with col2:
 with col3:
     st.metric("Período", timeframe)
 with col4:
-    st.metric("Lucro da sessão", f"R$ {st.session_state.lucro_sessao:.2f}")
+    st.metric("Lucro da sessão", f"R$ {st.session_state.get('lucro_sessao', 0.0):.2f}")
 
 left, right = st.columns([1, 1])
 with left:
