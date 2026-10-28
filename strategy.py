@@ -73,13 +73,13 @@ def analyze_market(candles):
     padrao_alta = engolfo_alta or bullish_rejection
     padrao_baixa = engolfo_baixa or bearish_rejection
 
-    if tendencia == "Alta" and padrao_alta and proximo_de_Fibonacci:
+    if trend == "Alta" and padrao_alta and near_fib:
         sinal = "COMPRA (simulada)"
         confianca = "Alta"
         padrao = "engolfo de alta" if engolfo_alta else "rejeição compradora"
         razao = f"Tendência de alta + {padrao} + proximidade de Fibonacci."
 
-    elif tendencia == "Baixa" and padrao_baixa and proximo_de_Fibonacci:
+    elif trend == "Baixa" and padrao_baixa and near_fib:
         sinal = "VENDA (simulada)"
         confianca = "Alta"
         padrao = "engolfo de baixa" if engolfo_baixa else "rejeição vendedora"
@@ -87,9 +87,9 @@ def analyze_market(candles):
 
     else:
         detalhes = []
-        detalhes.append(f"tendência: {tendencia.lower()}")
+        detalhes.append(f"tendência: {trend.lower()}")
         detalhes.append("padrão de candle identificado" if (padrao_alta or padrao_baixa) else "sem padrão claro")
-        detalhes.append("próximo de Fibonacci" if proximo_de_Fibonacci else "longe das zonas de Fibonacci")
+        detalhes.append("near_fib" if proximo_de_Fibonacci else "longe das zonas de Fibonacci")
         razao = "AGUARDAR: " + "; ".join(detalhes) + "."
 
     return {
