@@ -52,6 +52,7 @@ with left:
                 "Sinal": result["signal"],
                 "Preço simulado": round(result["last_price"], 5),
                 "Tendência": result["trend"],
+                "Confiança": result["confidence"],
                 "Motivo": result["reason"],
                 "Resultado": "PENDENTE (simulação)"
             })
