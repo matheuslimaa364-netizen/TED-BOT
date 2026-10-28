@@ -53,9 +53,9 @@ with left:
             resultado_operacao = np.random.choice(["WIN ✅", "LOSS ❌"])
 
             if resultado_operacao == "WIN ✅":
-                st.session_state.lucro_sessao += entry_amount * 0.85
+                st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) + (entry_amount * 0.85)
             else:
-                st.session_state.lucro_sessao -= entry_amount
+                st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) - entry_amount
 
                 st.session_state.history.insert(0, {
                 "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
