@@ -13,7 +13,7 @@ if "running" not in st.session_state:
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
     if "lucro_sessao" not in st.session_state:
-    st.session_state.lucro_sessao = 0.0
+        st.session_state.lucro_sessao = 0.0
 
 st.title("📈 TED BOT TRADER")
 st.caption("Protótipo de estudo — Price Action + Fibonacci | Somente simulação")
