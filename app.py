@@ -12,6 +12,8 @@ if "running" not in st.session_state:
     st.session_state.running = False
 if "last_analysis" not in st.session_state:
     st.session_state.last_analysis = None
+    if "lucro_sessao" not in st.session_state:
+    st.session_state.lucro_sessao = 0.0
 
 st.title("📈 TED BOT TRADER")
 st.caption("Protótipo de estudo — Price Action + Fibonacci | Somente simulação")
@@ -30,13 +32,15 @@ with st.sidebar:
     st.subheader("Modo")
     st.info("SIMULAÇÃO — não conectado à corretora")
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Estado", "Executando simulação" if st.session_state.running else "Pausado")
 with col2:
     st.metric("Sinais nesta sessão", len(st.session_state.history), f"Limite: {int(max_signals)}")
 with col3:
     st.metric("Período", timeframe)
+with col4:
+    st.metric("Lucro da sessão", f"R$ {st.session_state.lucro_sessao:.2f}")
 
 left, right = st.columns([1, 1])
 with left:
@@ -46,7 +50,14 @@ with left:
         result = analyze_market(candles)
         st.session_state.last_analysis = result
         if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
-            st.session_state.history.insert(0, {
+            resultado_operacao = np.random.choice(["WIN ✅", "LOSS ❌"])
+
+            if resultado_operacao == "WIN ✅":
+                st.session_state.lucro_sessao += entry_amount * 0.85
+            else:
+                st.session_state.lucro_sessao -= entry_amount
+
+                st.session_state.history.insert(0, {
                 "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                 "Período": timeframe,
                 "Sinal": result["signal"],
@@ -54,7 +65,7 @@ with left:
                 "Tendência": result["trend"],
                 "Confiança": result["confidence"],
                 "Motivo": result["reason"],
-                "Resultado": "PENDENTE (simulação)"
+                "Resultado": resultado_operacao
             })
         st.rerun()
 with right:
