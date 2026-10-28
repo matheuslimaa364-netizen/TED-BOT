@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 
 from strategy import generate_demo_candles, analyze_market
-
+from risk_manager import verificar_risco
 
 # =========================================================
 # CONFIGURACAO DA PAGINA
