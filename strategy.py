@@ -67,7 +67,7 @@ def analyze_market(candles):
     price = float(last["close"])
     near_fib = min(abs(price - level) / max(span, 1e-9) for level in fibs.values()) < 0.12
 
-        sinal = "AGUARDAR"
+    sinal = "AGUARDAR"
     confianca = "Baixa"
     razao = "Os critérios ainda não coincidem."
     padrao_alta = engolfo_de_alta or rejeicao_otimista
