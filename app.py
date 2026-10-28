@@ -49,28 +49,31 @@ with left:
         candles = generate_demo_candles(timeframe=timeframe, seed=int(datetime.now().timestamp()) % 100000)
         result = analyze_market(candles)
         st.session_state.last_analysis = result
-        if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
+               if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
             resultado_operacao = np.random.choice(["WIN ✅", "LOSS ❌"])
 
             if resultado_operacao == "WIN ✅":
                 st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) + (entry_amount * 0.85)
             else:
                 st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) - entry_amount
+
             if st.session_state.lucro_sessao >= daily_target:
                 st.session_state.running = False
+
             if st.session_state.lucro_sessao <= -daily_loss_limit:
                 st.session_state.running = False
 
-                      st.session_state.history.insert(0, {
-            "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-            "Período": timeframe,
-            "Sinal": result["signal"],
-            "Preço simulado": round(result["last_price"], 5),
-            "Tendência": result["trend"],
-            "Confiança": result["confidence"],
-            "Motivo": result["reason"],
-            "Resultado": resultado_operacao
-        })
+            st.session_state.history.insert(0, {
+                "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                "Período": timeframe,
+                "Sinal": result["signal"],
+                "Preço simulado": round(result["last_price"], 5),
+                "Tendência": result["trend"],
+                "Confiança": result["confidence"],
+                "Motivo": result["reason"],
+                "Resultado": resultado_operacao
+            })
+
         st.rerun()
 with right:
     if st.button("⏸️ Pausar simulação", use_container_width=True):
