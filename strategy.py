@@ -13,15 +13,15 @@ def generate_demo_candles(timeframe="M5", periods=80, seed=None):
     wick_down = rng.uniform(0.0001, 0.0010, size=periods)
     high = np.maximum(open_, close) + wick_up
     low = np.minimum(open_, close) - wick_down
-    if timeframe == "M1":
+          if timeframe == "M1":
         freq = "min"
     elif timeframe == "M15":
         freq = "15min"
     else:
         freq = "5min"
-    times = pd.date_range(end=pd.Timestamp.now(), periods=periods, freq=freq)
-    return pd.DataFrame({"time": times, "open": open_, "high": high, "low": low, "close": close})
 
+    times = pd.date_range(end=pd.Timestamp.now(), periods=periods, freq=freq)
+    return pd.DataFrame({"time": times, "open": open, "high": high, "low": low, "close": close})
 
 def analyze_market(candles):
     """Análise educativa simples: tendência, candle e proximidade de Fibonacci."""
