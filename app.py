@@ -51,12 +51,12 @@ with left:
         st.session_state.last_analysis = result
         if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
                    preco_entrada = float(candles.iloc[-1]["close"])            
-                        candles_futuros = generate_demo_candles(
+                   candles_futuros = generate_demo_candles(
                                 timeframe=timeframe,
                                             seed=(int(datetime.now().timestamp()) % 100000) + 1
             
                         )
-            preco_saida = float(candles_futuros.iloc[-1]["close"])
+                    preco_saida = float(candles_futuros.iloc[-1]["close"])
 
                     if "COMPRA" in result["signal"]:
                                         resultado_operacao = "WIN ✅" if preco_saida > preco_entrada else "LOSS ❌"
@@ -67,13 +67,13 @@ with left:
                                         st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) + (entry_amount * 0.85)
                                     else:
                                                         st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) - entry_amount
-            if st.session_state.lucro_sessao >= daily_target:
+                    if st.session_state.lucro_sessao >= daily_target:
                 st.session_state.running = False
 
-            if st.session_state.lucro_sessao <= -daily_loss_limit:
+                    if st.session_state.lucro_sessao <= -daily_loss_limit:
                 st.session_state.running = False
 
-            st.session_state.history.insert(0, {
+                    st.session_state.history.insert(0, {
                 "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                 "Período": timeframe,
                 "Sinal": result["signal"],
