@@ -84,6 +84,10 @@ modo_conta = st.sidebar.selectbox(
     "Modo da conta",
     ["🧪 DEMO", "💰 REAL"]
 )
+modo_polarium = "DEMO" if "DEMO" in modo_conta else "REAL"
+
+polarium = PolariumConnector(modo=modo_polarium)
+status_polarium = polarium.conectar()
 st.sidebar.checkbox(
     "Martingale (desativado por segurança)",
     value=False,
