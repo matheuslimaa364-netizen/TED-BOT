@@ -109,19 +109,28 @@ st.line_chart(candles.set_index("time")[["close"]], height=220)
 st.caption("Gráfico criado com preços sintéticos para testar a interface e a lógica. Não representa cotações atuais.")
 
 st.subheader("🧾 Histórico de sinais da sessão")
+
 if st.session_state.history:
-    st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True, hide_index=True)
+    st.dataframe(
+        pd.DataFrame(st.session_state.history),
+        use_container_width=True,
+        hide_index=True
+    )
+
     if st.button("🗑️ Limpar histórico da sessão"):
         st.session_state.history = []
         st.rerun()
-    if st.button("🔄 Nova sessão"):
-        st.session_state.history = []
-        st.session_state.lucro_sessao = 0.0
-        st.session_state.running = False
-        st.session_state.last_analysis = None
-        st.rerun()
 else:
     st.write("Nenhum sinal registrado ainda. A estratégia pode retornar AGUARDAR quando os critérios não forem atendidos.")
+
+if st.button("🔄 Nova sessão"):
+    st.session_state.history = []
+    st.session_state.lucro_sessao = 0.0
+    st.session_state.running = False
+    st.session_state.last_analysis = None
+    st.rerun()
+
+
 
 st.divider()
 st.caption("Aviso: projeto educacional em simulação. Não é recomendação financeira, não está conectado à corretora e não executa compras ou vendas reais.")
