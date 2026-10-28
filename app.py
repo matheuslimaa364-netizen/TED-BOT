@@ -114,6 +114,12 @@ if st.session_state.history:
     if st.button("🗑️ Limpar histórico da sessão"):
         st.session_state.history = []
         st.rerun()
+    if st.button("🔄 Nova sessão"):
+        st.session_state.history = []
+        st.session_state.lucro_sessao = 0.0
+        st.session_state.running = False
+        st.session_state.last_analysis = None
+        st.rerun()
 else:
     st.write("Nenhum sinal registrado ainda. A estratégia pode retornar AGUARDAR quando os critérios não forem atendidos.")
 
