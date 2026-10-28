@@ -202,8 +202,9 @@ with left:
             analysis_candles
         )
 
-        st.session_state.last_analysis = result
-        if "COMPRA" in result["signal"]:
+st.session_state.last_analysis = result
+
+if "COMPRA" in result["signal"]:
     ordem_polarium = "BUY"
 elif "VENDA" in result["signal"]:
     ordem_polarium = "SELL"
@@ -217,7 +218,6 @@ st.session_state.ordem_polarium = {
     "valor": entry_amount,
     "ordem": ordem_polarium
 }
-
 
         # -------------------------------------------------
         # REGISTRA SOMENTE COMPRA OU VENDA
