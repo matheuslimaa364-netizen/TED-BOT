@@ -202,7 +202,7 @@ with left:
             analysis_candles
         )
 
-                st.session_state.last_analysis = result
+        st.session_state.last_analysis = result
                 
         if "COMPRA" in result["signal"]:
             ordem_polarium = "BUY"
