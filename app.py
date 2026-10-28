@@ -49,7 +49,7 @@ with left:
         candles = generate_demo_candles(timeframe=timeframe, seed=int(datetime.now().timestamp()) % 100000)
         result = analyze_market(candles)
         st.session_state.last_analysis = result
-            if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
+        if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
             resultado_operacao = np.random.choice(["WIN ✅", "LOSS ❌"])
 
             if resultado_operacao == "WIN ✅":
