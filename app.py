@@ -61,16 +61,16 @@ with left:
             if st.session_state.lucro_sessao <= -daily_loss_limit:
                 st.session_state.running = False
 
-                st.session_state.history.insert(0, {
-                "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-                "Período": timeframe,
-                "Sinal": result["signal"],
-                "Preço simulado": round(result["last_price"], 5),
-                "Tendência": result["trend"],
-                "Confiança": result["confidence"],
-                "Motivo": result["reason"],
-                "Resultado": resultado_operacao
-            })
+                      st.session_state.history.insert(0, {
+            "Horário": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "Período": timeframe,
+            "Sinal": result["signal"],
+            "Preço simulado": round(result["last_price"], 5),
+            "Tendência": result["trend"],
+            "Confiança": result["confidence"],
+            "Motivo": result["reason"],
+            "Resultado": resultado_operacao
+        })
         st.rerun()
 with right:
     if st.button("⏸️ Pausar simulação", use_container_width=True):
