@@ -93,7 +93,7 @@ def analyze_market(candles):
         razao = "AGUARDAR: " + "; ".join(detalhes) + "."
 
     return {
-        "signal": signal,
+        "signal": sinal,
         "trend": trend,
         "last_price": price,
         "confidence": confidence,
