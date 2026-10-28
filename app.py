@@ -405,6 +405,22 @@ else:
     )
 
 
+st.subheader("📡 Ordem Polarium")
+
+if "ordem_polarium" in st.session_state:
+    ordem = st.session_state.ordem_polarium
+
+    st.write(f"**Conta:** {ordem['conta']}")
+    st.write(f"**Ativo:** {ordem['ativo']}")
+    st.write(f"**Período:** {ordem['periodo']}")
+    st.write(f"**Valor:** R$ {ordem['valor']:.2f}")
+    st.write(f"**Ordem:** {ordem['ordem']}")
+else:
+    st.info("Nenhuma ordem Polarium gerada ainda.")
+
+
+
+
 # =========================================================
 # ULTIMA ANALISE
 # =========================================================
