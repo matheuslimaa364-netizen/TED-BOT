@@ -4,7 +4,7 @@ from datetime import datetime
 
 from strategy import generate_demo_candles, analyze_market
 from risk_manager import verificar_risco
-
+from polarium import PolariumConnector
 # =========================================================
 # CONFIGURACAO DA PAGINA
 # =========================================================
