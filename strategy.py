@@ -70,19 +70,19 @@ def analyze_market(candles):
     sinal = "AGUARDAR"
     confianca = "Baixa"
     razao = "Os critérios ainda não coincidem."
-    padrao_alta = engolfo_de_alta or rejeicao_otimista
-    padrao_baixa = engolfo_de_baixa or rejeicao_baixista
+    padrao_alta = engolfo_alta or rejeicao_otimista
+    padrao_baixa = engolfo_baixa or rejeicao_baixista
 
     if tendencia == "Alta" and padrao_alta and proximo_de_Fibonacci:
         sinal = "COMPRA (simulada)"
         confianca = "Alta"
-        padrao = "engolfo de alta" if engolfo_de_alta else "rejeição compradora"
+        padrao = "engolfo de alta" if engolfo_alta else "rejeição compradora"
         razao = f"Tendência de alta + {padrao} + proximidade de Fibonacci."
 
     elif tendencia == "Baixa" and padrao_baixa and proximo_de_Fibonacci:
         sinal = "VENDA (simulada)"
         confianca = "Alta"
-        padrao = "engolfo de baixa" if engolfo_de_baixa else "rejeição vendedora"
+        padrao = "engolfo de baixa" if engolfo_baixa else "rejeição vendedora"
         razao = f"Tendência de baixa + {padrao} + proximidade de Fibonacci."
 
     else:
