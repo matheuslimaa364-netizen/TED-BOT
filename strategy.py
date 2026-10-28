@@ -12,7 +12,7 @@ def generate_demo_candles(timeframe="M5", periods=80, seed=None):
     wick_up = rng.uniform(0.0001, 0.0010, size=periods)
     wick_down = rng.uniform(0.0001, 0.0010, size=periods)
     high = np.maximum(open, close) + wick_up
-    low = np.minimum(open_, close) - wick_down
+    low = np.minimum(open, close) - wick_down
     if timeframe == "M1":
         freq = "min"
     elif timeframe == "M15":
