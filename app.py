@@ -1,5 +1,4 @@
 import streamlit as st
-import numpy as np
 import pandas as pd
 from datetime import datetime
 
@@ -7,7 +6,7 @@ from strategy import generate_demo_candles, analyze_market
 
 
 # =========================================================
-# CONFIGURAÇÃO DA PÁGINA
+# CONFIGURACAO DA PAGINA
 # =========================================================
 
 st.set_page_config(
@@ -17,11 +16,14 @@ st.set_page_config(
 )
 
 st.title("📈 TED BOT TRADER")
-st.caption("Protótipo de estudo — Price Action + Fibonacci | Somente simulação")
+st.caption(
+    "Protótipo de estudo — Price Action + Fibonacci | "
+    "Somente simulação"
+)
 
 
 # =========================================================
-# ESTADO DA SESSÃO
+# ESTADO DA SESSAO
 # =========================================================
 
 if "running" not in st.session_state:
@@ -36,9 +38,12 @@ if "last_analysis" not in st.session_state:
 if "lucro_sessao" not in st.session_state:
     st.session_state.lucro_sessao = 0.0
 
+if "last_candles" not in st.session_state:
+    st.session_state.last_candles = None
+
 
 # =========================================================
-# CONFIGURAÇÕES
+# CONFIGURACOES
 # =========================================================
 
 st.sidebar.header("⚙️ Configurações")
@@ -95,15 +100,32 @@ st.sidebar.caption(
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    estado = "Executando simulação" if st.session_state.running else "Pausado"
-    st.metric("Estado", estado)
+    estado = (
+        "Executando simulação"
+        if st.session_state.running
+        else "Pausado"
+    )
+
+    st.metric(
+        "Estado",
+        estado
+    )
 
 with col2:
-    st.metric("Sinais nesta sessão", len(st.session_state.history))
-    st.caption(f"Limite: {int(max_signals)}")
+    st.metric(
+        "Sinais nesta sessão",
+        len(st.session_state.history)
+    )
+
+    st.caption(
+        f"Limite: {int(max_signals)}"
+    )
 
 with col3:
-    st.metric("Período", timeframe)
+    st.metric(
+        "Período",
+        timeframe
+    )
 
 with col4:
     st.metric(
@@ -113,10 +135,15 @@ with col4:
 
 
 # =========================================================
-# BOTÕES
+# BOTOES
 # =========================================================
 
 left, right = st.columns([1, 1])
+
+
+# =========================================================
+# INICIAR SIMULACAO
+# =========================================================
 
 with left:
 
@@ -128,51 +155,93 @@ with left:
 
         st.session_state.running = True
 
+        # -------------------------------------------------
+        # GERA UMA UNICA SEQUENCIA DE CANDLES
+        # -------------------------------------------------
+
+        seed = int(
+            datetime.now().timestamp()
+        ) % 100000
+
         candles = generate_demo_candles(
             timeframe=timeframe,
-            seed=int(datetime.now().timestamp()) % 100000
+            periods=105,
+            seed=seed
         )
 
-        result = analyze_market(candles)
+        st.session_state.last_candles = candles
+
+
+        # -------------------------------------------------
+        # SEPARA PASSADO E FUTURO
+        #
+        # Os primeiros 100 candles sao usados na analise.
+        # Os 5 ultimos representam candles posteriores.
+        # -------------------------------------------------
+
+        analysis_candles = candles.iloc[:100].copy()
+
+        future_candles = candles.iloc[100:].copy()
+
+
+        # -------------------------------------------------
+        # ANALISA SOMENTE OS CANDLES ANTERIORES
+        # -------------------------------------------------
+
+        result = analyze_market(
+            analysis_candles
+        )
 
         st.session_state.last_analysis = result
 
-        # Só registra quando houver sinal
+
+        # -------------------------------------------------
+        # REGISTRA SOMENTE COMPRA OU VENDA
+        # -------------------------------------------------
+
         if (
             result["signal"] != "AGUARDAR"
-            and len(st.session_state.history) < int(max_signals)
+            and
+            len(st.session_state.history)
+            < int(max_signals)
         ):
 
-            # Preço no momento do sinal
-            preco_entrada = float(candles.iloc[-1]["close"])
-
-            # Gera um novo conjunto de candles para simular
-            # o movimento posterior ao sinal
-            candles_futuros = generate_demo_candles(
-                timeframe=timeframe,
-                seed=(int(datetime.now().timestamp()) % 100000) + 1
+            # Preco no momento do sinal
+            preco_entrada = float(
+                analysis_candles.iloc[-1]["close"]
             )
 
-            preco_saida = float(candles_futuros.iloc[-1]["close"])
+            # Preco apos os candles seguintes
+            preco_saida = float(
+                future_candles.iloc[-1]["close"]
+            )
 
-            # Calcula WIN ou LOSS de acordo com a direção
+
+            # ---------------------------------------------
+            # RESULTADO DA OPERACAO
+            # ---------------------------------------------
+
             if "COMPRA" in result["signal"]:
 
-                resultado_operacao = (
-                    "WIN ✅"
-                    if preco_saida > preco_entrada
-                    else "LOSS ❌"
-                )
+                if preco_saida > preco_entrada:
+                    resultado_operacao = "WIN ✅"
+
+                else:
+                    resultado_operacao = "LOSS ❌"
 
             else:
 
-                resultado_operacao = (
-                    "WIN ✅"
-                    if preco_saida < preco_entrada
-                    else "LOSS ❌"
-                )
+                if preco_saida < preco_entrada:
+                    resultado_operacao = "WIN ✅"
 
-            # Atualiza lucro simulado
+                else:
+                    resultado_operacao = "LOSS ❌"
+
+
+            # ---------------------------------------------
+            # ATUALIZA LUCRO
+            # ---------------------------------------------
+
             if resultado_operacao == "WIN ✅":
 
                 st.session_state.lucro_sessao += (
@@ -181,36 +250,85 @@ with left:
 
             else:
 
-                st.session_state.lucro_sessao -= entry_amount
+                st.session_state.lucro_sessao -= (
+                    entry_amount
+                )
 
-            # Verifica meta
-            if st.session_state.lucro_sessao >= daily_target:
+
+            # ---------------------------------------------
+            # VERIFICA META
+            # ---------------------------------------------
+
+            if (
+                st.session_state.lucro_sessao
+                >= daily_target
+            ):
+
                 st.session_state.running = False
 
-            # Verifica limite de perda
-            if st.session_state.lucro_sessao <= -daily_loss_limit:
+
+            # ---------------------------------------------
+            # VERIFICA LIMITE DE PERDA
+            # ---------------------------------------------
+
+            if (
+                st.session_state.lucro_sessao
+                <= -daily_loss_limit
+            ):
+
                 st.session_state.running = False
 
-            # Salva no histórico
+
+            # ---------------------------------------------
+            # SALVA NO HISTORICO
+            # ---------------------------------------------
+
             st.session_state.history.insert(
                 0,
                 {
-                    "Horário": datetime.now().strftime(
-                        "%d/%m/%Y %H:%M:%S"
-                    ),
-                    "Período": timeframe,
-                    "Sinal": result["signal"],
-                    "Preço entrada": round(preco_entrada, 5),
-                    "Preço saída": round(preco_saida, 5),
-                    "Tendência": result["trend"],
-                    "Confiança": result["confidence"],
-                    "Motivo": result["reason"],
-                    "Resultado": resultado_operacao
+                    "Horário":
+                        datetime.now().strftime(
+                            "%d/%m/%Y %H:%M:%S"
+                        ),
+
+                    "Período":
+                        timeframe,
+
+                    "Sinal":
+                        result["signal"],
+
+                    "Preço entrada":
+                        round(
+                            preco_entrada,
+                            5
+                        ),
+
+                    "Preço saída":
+                        round(
+                            preco_saida,
+                            5
+                        ),
+
+                    "Tendência":
+                        result["trend"],
+
+                    "Confiança":
+                        result["confidence"],
+
+                    "Motivo":
+                        result["reason"],
+
+                    "Resultado":
+                        resultado_operacao
                 }
             )
 
         st.rerun()
 
+
+# =========================================================
+# PAUSAR
+# =========================================================
 
 with right:
 
@@ -220,6 +338,7 @@ with right:
     ):
 
         st.session_state.running = False
+
         st.rerun()
 
 
@@ -227,14 +346,20 @@ with right:
 # STATUS
 # =========================================================
 
-if st.session_state.lucro_sessao >= daily_target:
+if (
+    st.session_state.lucro_sessao
+    >= daily_target
+):
 
     st.success(
         "🎯 Meta diária atingida! "
         "Simulação pausada automaticamente."
     )
 
-elif st.session_state.lucro_sessao <= -daily_loss_limit:
+elif (
+    st.session_state.lucro_sessao
+    <= -daily_loss_limit
+):
 
     st.error(
         "🔴 Limite de perda atingido! "
@@ -257,16 +382,18 @@ else:
 
 
 # =========================================================
-# ÚLTIMA ANÁLISE
+# ULTIMA ANALISE
 # =========================================================
 
-st.subheader("🔎 Última análise demonstrativa")
+st.subheader(
+    "🔎 Última análise demonstrativa"
+)
 
 if st.session_state.last_analysis is None:
 
     st.info(
-        'Clique em "Iniciar simulação" para gerar uma '
-        "análise com candles fictícios."
+        'Clique em "Iniciar simulação" para gerar '
+        "uma análise com candles fictícios."
     )
 
 else:
@@ -276,18 +403,28 @@ else:
     a, b, c, d = st.columns(4)
 
     with a:
-        st.metric("Sinal", result["signal"])
+
+        st.metric(
+            "Sinal",
+            result["signal"]
+        )
 
     with b:
-        st.metric("Tendência", result["trend"])
+
+        st.metric(
+            "Tendência",
+            result["trend"]
+        )
 
     with c:
+
         st.metric(
             "Preço fictício",
             f'{result["last_price"]:.5f}'
         )
 
     with d:
+
         st.metric(
             "Força do sinal",
             result["confidence"]
@@ -298,15 +435,25 @@ else:
         result["reason"]
     )
 
+
+    # =====================================================
+    # FIBONACCI
+    # =====================================================
+
     st.write(
         "**Níveis de Fibonacci calculados (referência):**"
     )
 
-    fibonacci = result.get("fibonacci", {})
+    fibonacci = result.get(
+        "fibonacci",
+        {}
+    )
 
     if fibonacci:
 
-        fib_cols = st.columns(len(fibonacci))
+        fib_cols = st.columns(
+            len(fibonacci)
+        )
 
         for coluna, (nivel, valor) in zip(
             fib_cols,
@@ -314,6 +461,7 @@ else:
         ):
 
             with coluna:
+
                 st.metric(
                     nivel,
                     f"{float(valor):.5f}"
@@ -321,23 +469,48 @@ else:
 
 
 # =========================================================
-# GRÁFICO DEMONSTRATIVO
+# GRAFICO DA ULTIMA SEQUENCIA
 # =========================================================
 
-st.subheader("📊 Gráfico demonstrativo")
-
-grafico = generate_demo_candles(
-    timeframe=timeframe,
-    seed=12345
+st.subheader(
+    "📊 Gráfico demonstrativo"
 )
 
-if "close" in grafico.columns:
+if st.session_state.last_candles is not None:
 
-    chart_data = grafico[["close"]].copy()
+    dados_grafico = (
+        st.session_state.last_candles[
+            ["close"]
+        ].copy()
+    )
 
-    chart_data.columns = ["Preço sintético"]
+    dados_grafico.columns = [
+        "Preço sintético"
+    ]
 
-    st.line_chart(chart_data)
+    st.line_chart(
+        dados_grafico
+    )
+
+else:
+
+    grafico = generate_demo_candles(
+        timeframe=timeframe,
+        periods=105,
+        seed=12345
+    )
+
+    dados_grafico = grafico[
+        ["close"]
+    ].copy()
+
+    dados_grafico.columns = [
+        "Preço sintético"
+    ]
+
+    st.line_chart(
+        dados_grafico
+    )
 
 st.caption(
     "Gráfico criado com preços sintéticos para testar "
@@ -346,10 +519,12 @@ st.caption(
 
 
 # =========================================================
-# HISTÓRICO
+# HISTORICO
 # =========================================================
 
-st.subheader("📋 Histórico de sinais da sessão")
+st.subheader(
+    "📋 Histórico de sinais da sessão"
+)
 
 if len(st.session_state.history) > 0:
 
@@ -371,27 +546,40 @@ else:
 
 
 # =========================================================
-# LIMPAR HISTÓRICO
+# LIMPAR HISTORICO
 # =========================================================
 
-if st.button("🗑️ Limpar histórico da sessão"):
+if st.button(
+    "🗑️ Limpar histórico da sessão"
+):
 
     st.session_state.history = []
+
     st.session_state.lucro_sessao = 0.0
+
     st.session_state.last_analysis = None
+
+    st.session_state.last_candles = None
 
     st.rerun()
 
 
 # =========================================================
-# NOVA SESSÃO
+# NOVA SESSAO
 # =========================================================
 
-if st.button("🔄 Nova sessão"):
+if st.button(
+    "🔄 Nova sessão"
+):
 
     st.session_state.history = []
+
     st.session_state.lucro_sessao = 0.0
+
     st.session_state.last_analysis = None
+
+    st.session_state.last_candles = None
+
     st.session_state.running = False
 
     st.rerun()
@@ -408,5 +596,3 @@ st.caption(
     "Os candles, preços, sinais e resultados apresentados "
     "são simulados."
 )
-   
-
