@@ -85,7 +85,10 @@ modo_conta = st.sidebar.selectbox(
     ["🧪 DEMO", "💰 REAL"]
 )
 modo_polarium = "DEMO" if "DEMO" in modo_conta else "REAL"
-
+ativo_polarium = st.sidebar.selectbox(
+    "Ativo Polarium",
+    ["EUR/USD OTC", "EUR/JPY OTC", "EUR/GBP OTC"]
+)
 polarium = PolariumConnector(modo=modo_polarium)
 status_polarium = polarium.conectar()
 st.sidebar.checkbox(
