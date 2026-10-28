@@ -89,7 +89,7 @@ def analyze_market(candles):
         detalhes = []
         detalhes.append(f"tendência: {trend.lower()}")
         detalhes.append("padrão de candle identificado" if (padrao_alta or padrao_baixa) else "sem padrão claro")
-        detalhes.append("near_fib" if proximo_de_Fibonacci else "longe das zonas de Fibonacci")
+        detalhes.append("near_fib" if near_fib else "longe das zonas de Fibonacci")
         razao = "AGUARDAR: " + "; ".join(detalhes) + "."
 
     return {
