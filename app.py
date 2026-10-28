@@ -50,13 +50,17 @@ with left:
         result = analyze_market(candles)
         st.session_state.last_analysis = result
         if result["signal"] != "AGUARDAR" and len(st.session_state.history) < int(max_signals):
-            preco_entrada = float(candles.iloc[-2]["close"])
-            preco_saida = float(candles.iloc[-1]["close"])
+                      preco_entrada = float(candles.iloc[-1]["close"])
+
+            candles_futuros = generate_demo_candles(
+                timeframe=timeframe,
+                seed=(int(datetime.now().timestamp()) % 100000) + 1)
+            preco_saida = float(candles_futuros.iloc[-1]["close"])
 
             if "COMPRA" in result["signal"]:
                 resultado_operacao = "WIN ✅" if preco_saida > preco_entrada else "LOSS ❌"
             else:
-                resultado_operacao = "WIN ✅" if preco_saida < preco_entrada else "LOSS ❌"
+                resultado_operacao = "WIN ✅" if preco_saida < preco_entrada else "LOSS ❌" 
 
             if resultado_operacao == "WIN ✅":
                 st.session_state.lucro_sessao = st.session_state.get("lucro_sessao", 0.0) + (entry_amount * 0.85)
