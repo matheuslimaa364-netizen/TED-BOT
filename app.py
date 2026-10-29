@@ -5,6 +5,10 @@ from datetime import datetime
 from strategy import generate_demo_candles, analyze_market
 from risk_manager import verificar_risco
 from polarium import PolariumConnector
+
+# Token da API Deriv salvo com segurança no Streamlit
+DERIV_API_TOKEN = st.secrets.get("DERIV_API_TOKEN", "")
+
 # =========================================================
 # CONFIGURACAO DA PAGINA
 # =========================================================
@@ -14,6 +18,11 @@ st.set_page_config(
     page_icon="📈",
     layout="wide"
 )
+
+if DERIV_API_TOKEN:
+    st.sidebar.success("🟢 Token Deriv carregado")
+else:
+    st.sidebar.error("🔴 Token Deriv não encontrado")
 
 st.title("📈 TED BOT TRADER")
 st.caption(
