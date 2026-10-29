@@ -26,6 +26,16 @@ if DERIV_API_TOKEN:
 else:
     st.sidebar.error("🔴 Token Deriv não encontrado")
 
+if DERIV_API_TOKEN and DERIV_APP_ID:
+    deriv = DerivConnector(DERIV_API_TOKEN, DERIV_APP_ID)
+    status_deriv = deriv.conectar()
+
+    if status_deriv["conectado"]:
+        tipo_conta = "DEMO" if status_deriv["is_virtual"] else "REAL"
+        st.sidebar.success(f"🟢 Deriv conectada — {tipo_conta}")
+    else:
+        st.sidebar.error(f"🔴 Erro Deriv: {status_deriv['erro']}")
+
 st.title("📈 TED BOT TRADER")
 st.caption(
     "Protótipo de estudo — Price Action + Fibonacci | "
