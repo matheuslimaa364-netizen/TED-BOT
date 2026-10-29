@@ -5,9 +5,11 @@ from datetime import datetime
 from strategy import generate_demo_candles, analyze_market
 from risk_manager import verificar_risco
 from polarium import PolariumConnector
+from deriv import DerivConnector
 
 # Token da API Deriv salvo com segurança no Streamlit
 DERIV_API_TOKEN = st.secrets.get("DERIV_API_TOKEN", "")
+DERIV_APP_ID = st.secrets.get("DERIV_APP_ID", "")
 
 # =========================================================
 # CONFIGURACAO DA PAGINA
