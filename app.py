@@ -226,18 +226,18 @@ with left:
         st.session_state.last_analysis = result
                 
         if "COMPRA" in result["signal"]:
-            ordem_polarium = "BUY"
+            ordem_deriv = "BUY"
         elif "VENDA" in result["signal"]:
-            ordem_polarium = "SELL"
+            ordem_deriv = "SELL"
         else:
-            ordem_polarium = "AGUARDAR"
+            ordem_deriv = "AGUARDAR"
 
-        st.session_state.ordem_polarium = {
-            "conta": modo_polarium,
-            "ativo": ativo_polarium,
+        st.session_state.ordem_deriv = {
+            "conta": "DEMO",
+            "ativo": "Deriv Options",
             "periodo": timeframe,
             "valor": entry_amount,
-            "ordem": ordem_polarium
+            "ordem": ordem_deriv
         }
 
         # -------------------------------------------------
@@ -426,10 +426,10 @@ else:
     )
 
 
-st.subheader("📡 Ordem Polarium")
+st.subheader("📡 Ordem Deriv — DEMO")
 
-if "ordem_polarium" in st.session_state:
-    ordem = st.session_state.ordem_polarium
+if "ordem_deriv" in st.session_state:
+    ordem = st.session_state.ordem_deriv
 
     st.write(f"**Conta:** {ordem['conta']}")
     st.write(f"**Ativo:** {ordem['ativo']}")
@@ -437,7 +437,7 @@ if "ordem_polarium" in st.session_state:
     st.write(f"**Valor:** R$ {ordem['valor']:.2f}")
     st.write(f"**Ordem:** {ordem['ordem']}")
 else:
-    st.info("Nenhuma ordem Polarium gerada ainda.")
+    st.info("Nenhuma ordem Deriv DEMO gerada ainda.")
 
 
 
