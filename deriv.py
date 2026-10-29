@@ -88,15 +88,10 @@ class DerivConnector:
                 }
             ws_segura = ws_url.split("?")[0]
 
-                return {
-                    "conectado": False,
-                    "erro": f"TESTE URL: {ws_segura}"
-                }
-            # 4. Conectar imediatamente usando a URL com OTP
-            self.ws = websocket.create_connection(
-                ws_url,
-                timeout=10
-            )
+            return {
+    "conectado": False,
+    "erro": f"TESTE URL: {ws_segura}"
+}
 
             return {
                 "conectado": True,
