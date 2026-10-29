@@ -87,10 +87,10 @@ class DerivConnector:
                     "erro": "A Deriv não retornou a URL WebSocket."
                 }
                 # 4. Conectar imediatamente usando a URL com OTP
-    self.ws = websocket.create_connection(
-        ws_url,
-        timeout=10
-    )
+                self.ws = websocket.create_connection(
+                    ws_url,
+                    timeout=10
+                )
             return {
                 "conectado": True,
                 "is_virtual": True,
